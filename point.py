@@ -45,7 +45,7 @@ class Point:
         return self.dist(o) * (1 + random.gauss(0, sigma))
 
     def __str__(self):
-        return "(" + ", ".join(map(str, self.coords)) + ")"
+        return "P(" + ", ".join(map(str, self.coords)) + ")"
 
 
 def read_points_from_file(filename: str):

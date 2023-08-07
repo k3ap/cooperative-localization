@@ -81,7 +81,7 @@ if __name__ == "__main__":
     locations = function(points, args)
     maxerror = 0
     num = 0
-    allerror = 0
+    errorsum = 0
     for loc, point in zip(locations, points):
 
         if point.typ == "S":
@@ -90,11 +90,11 @@ if __name__ == "__main__":
         error = point.dist(loc)
         print(f"Point at {point} calculated to be at {loc}, error = {error}")
         maxerror = max(maxerror, error)
-        allerror += error
+        errorsum += error * error
         num += 1
 
     print(f"Maximal error: {maxerror}")
-    print(f"Average error: {allerror / num}")
+    print(f"MSE: {errorsum / num}")
 
     if args.do_image:
         draw_image(points, locations)
