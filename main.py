@@ -1,5 +1,6 @@
 import argparse
 import importlib
+import math
 
 from point import read_points_from_file
 
@@ -69,7 +70,8 @@ if __name__ == "__main__":
         default=False
     )
 
-    parser.add_argument("-v", "--visibility", help="The maximum visible distance")
+    parser.add_argument("-v", "--visibility", help="The maximum visible distance", type=float, default=math.inf)
+    parser.add_argument("-j", "--iterations", help="The number of algorithm iterations, when applicable.", type=int, default=100)
 
     args = parser.parse_args()
 
