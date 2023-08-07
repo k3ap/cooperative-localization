@@ -2,7 +2,7 @@ import argparse
 import importlib
 import math
 
-from point import read_points_from_file
+from point import read_points_from_file, Point
 
 
 def draw_image(points, locations):
@@ -79,6 +79,7 @@ if __name__ == "__main__":
     function = importlib.import_module(f"algorithms.{args.algorithm}").solve
 
     locations = function(points, args)
+
     maxerror = 0
     num = 0
     errorsum = 0
@@ -93,8 +94,21 @@ if __name__ == "__main__":
         errorsum += error * error
         num += 1
 
-    print(f"Maximal error: {maxerror}")
-    print(f"MSE: {errorsum / num}")
+    print(f"Maximal position error: {maxerror}")
+    print(f"Position MSE: {errorsum / num}")
+
+    maxerror = 0
+    num = 0
+    errorsum = 0
+    for loc1, pt1 in zip(locations, points):
+        for loc2, pt2 in zip(locations, points):
+            error = abs(Point(*loc1).dist(loc2) - pt1.dist(pt2))
+            maxerror = max(maxerror, error)
+            errorsum += error * error
+            num += 1
+
+    print(f"Maximal distance error: {maxerror}")
+    print(f"Distance MSE: {errorsum / num}")
 
     if args.do_image:
         draw_image(points, locations)
