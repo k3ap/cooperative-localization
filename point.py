@@ -53,7 +53,7 @@ class Point:
 
     def dist_noisy(self, o, sigma):
         """Calculate a noisy distance to other point or iterable."""
-        return self.dist(o) * (1 + random.gauss(0, sigma))
+        return self.dist(o) * abs(1 + random.gauss(0, sigma))
 
     def __str__(self):
         return "P(" + ", ".join(map(str, self.coords)) + ")"
