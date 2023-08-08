@@ -115,7 +115,7 @@ if __name__ == "__main__":
         num += 1
 
     print(f"Maximal position error: {maxerror}")
-    print(f"Position MSE: {errorsum / num}")
+    print(f"Position RMSE: {math.sqrt(errorsum / num)}")
 
     # Determine the distance error
     maxerror = 0
@@ -129,7 +129,7 @@ if __name__ == "__main__":
             num += 1
 
     print(f"Maximal distance error: {maxerror}")
-    print(f"Distance MSE: {errorsum / num}")
+    print(f"Distance RMSE: {math.sqrt(errorsum / num)}")
 
     if args.do_image:
         draw_image(points, locations)
