@@ -1,3 +1,20 @@
+"""main.py
+
+The main file for simulations.
+Run this file with command line args, e.g.
+`python main.py -f samples/sample1.csv -a leastsquares -v 5 -s 0.05 -i`
+
+If the `-i` argument is given, draw an image (of a 2D problem) and save it as
+image.png.
+
+Algorithms are implemented as .py files in the `algorithms/` subdirectory.
+The file should define a function `solve(points, args)`, which solves the
+localization problem, defined by the given points.
+The `args` object includes all commands line arguments.
+Your function should return the estimated positions of all points (including
+anchors) in the same order as they were provided.
+"""
+
 import argparse
 import importlib
 import math
@@ -6,10 +23,13 @@ from point import read_points_from_file, Point
 
 
 def draw_image(points, locations):
+    """Draw an image of a 2D problem."""
     from PIL import Image, ImageDraw
 
-    WIDTH = 400
-    HEIGHT = 400
+    # The dimensions (in pixels) of the resulting image.
+    WIDTH = 500
+    HEIGHT = 500
+
     PR = 3  # Drawn point radius
 
     im = Image.new("RGB", (WIDTH, HEIGHT), color=(255,255,255))
@@ -26,7 +46,6 @@ def draw_image(points, locations):
         top = max(top, p.coords[1])
         bot = min(bot, p.coords[1])
 
-
     def transform(x, y):
         """Transform point coordinates into image coordinates"""
         # Transformation:
@@ -36,8 +55,8 @@ def draw_image(points, locations):
         # -HEIGHT * 0.45 --- bot
         eta = 0.45
         return (
-            int( WIDTH * eta * (2 * x - left - right) / (right - left) + 0.5 * WIDTH),
-            int( HEIGHT * eta * (2 * y - top - bot) / (top - bot) + 0.5 * HEIGHT)
+            round( WIDTH * eta * (2 * x - left - right) / (right - left) + 0.5 * WIDTH ),
+            round( HEIGHT * eta * (2 * y - top - bot) / (top - bot) + 0.5 * HEIGHT )
         )
 
     for p, l in zip(points, locations):
@@ -75,11 +94,12 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    # Read and solve the problem
     points = read_points_from_file(args.file)
-    function = importlib.import_module(f"algorithms.{args.algorithm}").solve
+    solve_function = importlib.import_module(f"algorithms.{args.algorithm}").solve
+    locations = solve_function(points, args)
 
-    locations = function(points, args)
-
+    # Determine the position error.
     maxerror = 0
     num = 0
     errorsum = 0
@@ -97,6 +117,7 @@ if __name__ == "__main__":
     print(f"Maximal position error: {maxerror}")
     print(f"Position MSE: {errorsum / num}")
 
+    # Determine the distance error
     maxerror = 0
     num = 0
     errorsum = 0

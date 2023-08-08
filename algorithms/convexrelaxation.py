@@ -1,3 +1,12 @@
+"""convexrelaxation.py
+The parallel version of the convex relaxation algorithm, as described in
+"Simple and Fast Convex Relaxation Method for Cooperative Localization in Sensor
+Networks Using Range Measurements" by C. Soares, J. Xavier, and J. Gomes
+
+Example usage:
+`python main.py -f samples/sample2.csv -a convexrelaxation -v 4 -s 0.05 -j 300`
+"""
+
 import numpy as np
 import random
 from math import sqrt
@@ -9,28 +18,40 @@ class CRNetworkPoint(NetworkPoint):
 
     def __init__(self, point, spans):
         super().__init__(point)
+
+        # Randomize x at the start
         self.x = np.matrix([
             random.uniform(mini-1, maxi+1) for mini, maxi in spans
         ]).T
         self.prev = self.x
+
+        # We need to keep track of neighbouring nodes' estimated positions
         self.ws = {}
 
     def begin_iteration(self, iternum):
+        """Initiate an iteration at this node."""
         self.w = self.x + (iternum - 2) / (iternum + 1) * (self.x - self.prev)
         self.broadcast(self.w)
 
     def process_signals(self):
+        """The second step of the algorithm is to send and receive the position
+        estimates w."""
         while len(self.message_queue) > 0:
             msg, sender = self.message_queue.popleft()
             self.ws[sender] = msg
 
     def end_iteration(self, lipschitz):
+        """The final step of the iteration, and the bulk of the algorithm."""
+
         dg = len(self.neighbours) * self.w - sum(self.ws.values())
         for i, pt in enumerate(self.neighbours):
+
+            # Compute the projection of self.w onto B(self.ws[pt], self.distances[i])
             n = self.w - self.ws[pt]
             norm = np.linalg.norm(n)
             if norm > self.distances[i]:
                 n *= self.distances[i] / norm
+
             dg -= n
 
         dh = sum(self.w for k in self.ws.keys() if k.typ == "S")
@@ -38,13 +59,14 @@ class CRNetworkPoint(NetworkPoint):
             if pt.typ != "S":
                 continue
 
-            n = np.matrix(self.w)
+            # compute the projection of self.w onto B(pt, self.distances[i])
             a = np.matrix(pt.coords).T  # pt is an anchor
-            n -= a
+            n = self.w - a
             norm = np.linalg.norm(n)
             if norm > self.distances[i]:
                 n *= self.distances[i] / norm
             n += a
+
             dh -= n
 
         self.prev = np.matrix(self.x)
@@ -61,8 +83,8 @@ class CRNetworkPoint(NetworkPoint):
 
 
 def solve(points, args):
+    # Calculate the bounds for the problem
     spans = [[c,c] for c in points[0].coords]
-
     for pt in points:
         for i in range(len(pt.coords)):
             spans[i][0] = min(spans[i][0], pt.coords[i])
@@ -76,6 +98,7 @@ def solve(points, args):
     for pt in points:
         pt.measure_distances(args.sigma)
 
+    # Calculate the lipschitz constant
     maxdegree = 0
     maxanchors = 0
     for pt in points:
@@ -84,6 +107,7 @@ def solve(points, args):
 
     lipschitz = 2 * maxdegree + maxanchors
 
+    # Update nodes
     for iternum in range(1, 1+args.iterations):
         for pt in points:
             pt.begin_iteration(iternum)

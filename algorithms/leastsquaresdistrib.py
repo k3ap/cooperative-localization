@@ -1,13 +1,24 @@
+"""leastsquaresdistrib.py
+The least squares algorithm as a demonstration of NetworkPoint.
+Should give the same results as `algorithms/leastsquares.py`.
+
+Example usage:
+`python main.py -f samples/sample1.csv -a leastsquaresdistrib -v 5 -s 0.05`
+"""
+
+
 import numpy as np
 
 from distrib import NetworkPoint
 
 
 class LSNetworkPoint(NetworkPoint):
-    def get_distance(self):
+    def get_location(self):
+        """Calculate this point's estimated location."""
         if self.typ == "S":
             return tuple(self.coords)
 
+        # Find all nearby anchors and the distance to them
         anchors = list(filter(lambda pt: pt.typ == "S", self.neighbours))
         distances = [d for pt, d in zip(self.neighbours, self.distances) if pt.typ == "S"]
 
@@ -29,11 +40,15 @@ class LSNetworkPoint(NetworkPoint):
 
 
 def solve(points, args):
+
+    # Convert the given Point list into LSNetworkPoint
     points = list(map(LSNetworkPoint, points))
+
+    # We can only measure distances after we've filled in all neighbours
     for pt in points:
         pt.add_neighbours(points, args.visibility)
 
     for pt in points:
         pt.measure_distances(args.sigma)
 
-    return list(map(LSNetworkPoint.get_distance, points))
+    return list(map(LSNetworkPoint.get_location, points))

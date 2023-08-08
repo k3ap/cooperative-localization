@@ -1,3 +1,16 @@
+"""distrib.py
+Contains the definition of the NetworkPoint class, the base class for all
+distributed simulations.
+To use a networked simulation, you should subclass NetworkPoint, and convert
+the given points into your subclass in the `solve` function of your algorithm.
+Afterwards, call `add_neighbours` on all points, followed by `measure_distances`
+on all points.
+Implement the actual algorithm in your subclass, and call those methods in
+the desired order in the `solve` function.
+See `algorithms/leastsquaresdistrib.py` for an example usage.
+"""
+
+
 from point import Point
 from collections import deque
 
@@ -33,7 +46,8 @@ class NetworkPoint(Point):
         return "NP(" + ", ".join(map(str, self.coords)) + ")"
 
     def receive(self, message, sender):
-        """Receive a message"""
+        """Receive a message. You should handle messages in another function,
+        which reads from the message queue."""
         self.message_queue.append((message, sender))
 
     def broadcast(self, message):
