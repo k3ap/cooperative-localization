@@ -15,7 +15,7 @@ def solve(points, args):
                 anchors, distances = collect_anchors_and_distances(point, points, args.visibility, args.sigma)
             except ValueError:
                 print(f"Point {point} has too few anchors. Cannot determine position.")
-                locations.append((0 for __ in point))
+                locations.append(tuple(0 for __ in point))
 
             else:
 
