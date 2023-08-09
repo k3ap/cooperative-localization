@@ -73,27 +73,7 @@ def draw_image(points, locations):
     im.save("image.png")
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("-f", "--file", help="The file to be read for points", required=True)
-    parser.add_argument("-a", "--algorithm", help="The algoritm to use", required=True)
-
-    parser.add_argument("-s", "--sigma", help="The standard variation for noise", default=1.0, type=float)
-    parser.add_argument(
-        "-i", "--image",
-        help="Draw an image. Currently only supported for 2D coordinates.",
-        dest="do_image",
-        action="store_const",
-        const=True,
-        default=False
-    )
-
-    parser.add_argument("-v", "--visibility", help="The maximum visible distance", type=float, default=math.inf)
-    parser.add_argument("-j", "--iterations", help="The number of algorithm iterations, when applicable.", type=int, default=100)
-
-    args = parser.parse_args()
-
+def read_and_run(args):
     # Read and solve the problem
     points = read_points_from_file(args.file)
     solve_function = importlib.import_module(f"algorithms.{args.algorithm}").solve
@@ -133,3 +113,27 @@ if __name__ == "__main__":
 
     if args.do_image:
         draw_image(points, locations)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-f", "--file", help="The file to be read for points", required=True)
+    parser.add_argument("-a", "--algorithm", help="The algoritm to use", required=True)
+
+    parser.add_argument("-s", "--sigma", help="The standard variation for noise", default=1.0, type=float)
+    parser.add_argument(
+        "-i", "--image",
+        help="Draw an image. Currently only supported for 2D coordinates.",
+        dest="do_image",
+        action="store_const",
+        const=True,
+        default=False
+    )
+
+    parser.add_argument("-v", "--visibility", help="The maximum visible distance", type=float, default=math.inf)
+    parser.add_argument("-j", "--iterations", help="The number of algorithm iterations, when applicable.", type=int, default=100)
+
+    args = parser.parse_args()
+
+    read_and_run(args)
