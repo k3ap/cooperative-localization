@@ -55,7 +55,7 @@ class NetworkNode(Point):
             self.handle(msg, sender)
 
     def broadcast(self, msg):
-        for edge in self.edges:
+        for edge in self.edges.values():
             edge._send(msg)
 
     def handle(self, msg, sender):
@@ -63,8 +63,8 @@ class NetworkNode(Point):
 
 
 class Network:
-    def __init__(self, points, point_cls, args):
-        self.points = list(map(point_cls, points))
+    def __init__(self, points, point_cls, args, *node_init_args):
+        self.points = list(map(lambda p: point_cls(p, *node_init_args), points))
 
         self._add_neighbours(args.visibility)
         self._measure_distances(args.sigma)

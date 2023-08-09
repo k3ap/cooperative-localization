@@ -37,14 +37,14 @@ def draw_image(points, locations):
 
     # Find the leftmost, rightmost, highest and lowest coordinates
     # for points. These will be used for coordinate transformation
-    left = right = points[0].coords[0]
-    top = bot = points[0].coords[1]
+    left = right = points[0]._coords[0]
+    top = bot = points[0]._coords[1]
 
     for p in points:
-        left = min(left, p.coords[0])
-        right = max(right, p.coords[0])
-        top = max(top, p.coords[1])
-        bot = min(bot, p.coords[1])
+        left = min(left, p._coords[0])
+        right = max(right, p._coords[0])
+        top = max(top, p._coords[1])
+        bot = min(bot, p._coords[1])
 
     def transform(x, y):
         """Transform point coordinates into image coordinates"""
@@ -60,7 +60,7 @@ def draw_image(points, locations):
         )
 
     for p, l in zip(points, locations):
-        xp, yp = transform(*p.coords)
+        xp, yp = transform(*p._coords)
         xl, yl = transform(*l)
 
         if p.typ == "S":
