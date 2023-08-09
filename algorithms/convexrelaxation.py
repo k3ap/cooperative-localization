@@ -12,6 +12,7 @@ import random
 from math import sqrt
 
 from distrib import NetworkPoint
+from utils import random_vector
 
 
 class CRNetworkPoint(NetworkPoint):
@@ -20,9 +21,7 @@ class CRNetworkPoint(NetworkPoint):
         super().__init__(point)
 
         # Randomize x at the start
-        self.x = np.matrix([
-            random.uniform(mini-1, maxi+1) for mini, maxi in spans
-        ]).T
+        self.x = random_vector(spans)
         self.prev = self.x
 
         # We need to keep track of neighbouring nodes' estimated positions

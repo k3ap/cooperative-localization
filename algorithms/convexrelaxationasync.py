@@ -13,6 +13,7 @@ import random
 from math import sqrt
 
 from distrib import NetworkPoint
+from utils import random_vector
 
 
 class CRANetworkPoint(NetworkPoint):
@@ -27,9 +28,7 @@ class CRANetworkPoint(NetworkPoint):
         else:
             # If we don't know the precise value, we set it to random in the
             # start
-            self.x = np.matrix([
-                random.uniform(mini-1, maxi+1) for mini, maxi in spans
-            ]).T
+            self.x = random_vector(spans)
 
         # We'll need to keep track of this for initialization during updating
         self.spans = spans
@@ -52,9 +51,7 @@ class CRANetworkPoint(NetworkPoint):
     def update(self, lipscitz):
 
         # Randomize z at the start
-        z = np.matrix([
-            random.uniform(mini-1, maxi+1) for mini, maxi in self.spans
-        ]).T
+        z = random_vector(self.spans)
         prev = np.matrix(z)
 
         # The cutoff for maximum iterations has been set to 500, but this
