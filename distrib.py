@@ -11,13 +11,14 @@ See `algorithms/leastsquaresdistrib.py` for an example usage.
 """
 
 
-from point import Point
 from collections import deque
+
+from point import Point
 
 
 class NetworkPoint(Point):
     def __init__(self, point):
-        super().__init__(*point.coords, typ=point.typ)
+        super().__init__(*point._coords, typ=point.typ)
         self.neighbours = []
         self.distances = []
         self.message_queue = deque()
@@ -25,7 +26,7 @@ class NetworkPoint(Point):
     def add_neighbours(self, points, visibility):
         """Add the visible points from the given list to neighbours"""
         for point in points:
-            if point.dist(self) < visibility and point is not self:
+            if point._dist(self) < visibility and point is not self:
                 self.neighbours.append(point)
                 self.distances.append(None)
 
@@ -60,6 +61,3 @@ class NetworkPoint(Point):
         if to not in self.neighbours:
             return
         to.receive(message, self)
-
-    def __hash__(self):
-        return hash(tuple(self.coords))

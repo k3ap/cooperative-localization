@@ -88,7 +88,7 @@ def read_and_run(args):
         if point.typ == "S":
             continue
 
-        error = point.dist(loc)
+        error = point._dist(loc)
         print(f"Point at {point} calculated to be at {loc}, error = {error}")
         maxerror = max(maxerror, error)
         errorsum += error * error
@@ -103,7 +103,7 @@ def read_and_run(args):
     errorsum = 0
     for loc1, pt1 in zip(locations, points):
         for loc2, pt2 in zip(locations, points):
-            error = abs(Point(*loc1).dist(loc2) - pt1.dist(pt2))
+            error = abs(Point(*loc1)._dist(loc2) - pt1._dist(pt2))
             maxerror = max(maxerror, error)
             errorsum += error * error
             num += 1

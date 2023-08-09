@@ -99,9 +99,9 @@ def solve(points, args):
     # Calculate the bounds for the problem
     spans = [[c,c] for c in points[0].coords]
     for pt in points:
-        for i in range(len(pt.coords)):
-            spans[i][0] = min(spans[i][0], pt.coords[i])
-            spans[i][1] = max(spans[i][1], pt.coords[i])
+        for i in range(len(pt._coords)):
+            spans[i][0] = min(spans[i][0], pt._coords[i])
+            spans[i][1] = max(spans[i][1], pt._coords[i])
 
     points = list(map(lambda x: CRANetworkPoint(x, spans), points))
 
