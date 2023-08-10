@@ -31,7 +31,7 @@ class NetworkEdge:
             return super().__setattr__(name, value)
         self.props[name] = value
 
-    def _send(self, msg):
+    def send(self, msg):
         """Send a message along this edge"""
         self._dest._receive(msg, self._source._uid)
 
@@ -40,8 +40,9 @@ class NetworkNode(Point):
     def __init__(self, point):
         super().__init__(*point._coords, typ=point.typ)
         self.edges = {}
-        self._uid = generate_uid()
         self.message_queue = deque()
+        self._uid = generate_uid()
+        self._order = []
 
     def __str__(self):
         return "NP(" + ", ".join(map(str, self._coords)) + ")"
@@ -56,10 +57,14 @@ class NetworkNode(Point):
 
     def broadcast(self, msg):
         for edge in self.edges.values():
-            edge._send(msg)
+            edge.send(msg)
 
     def handle(self, msg, sender):
         pass
+
+    def edges_ordered(self):
+        for uid in self._order:
+            yield self.edges[uid]
 
 
 class Network:
@@ -74,6 +79,8 @@ class Network:
             for pt2 in self.points:
                 if pt1._distsq(pt2) < visibility*visibility:
                     pt1.edges[pt2._uid] = NetworkEdge(pt1, pt2)
+
+            pt1._order = list(pt1.edges)
 
     def _measure_distances(self, sigma):
         """Measure synchronized noisy distances between nodes."""
