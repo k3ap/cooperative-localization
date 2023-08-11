@@ -35,6 +35,9 @@ class NetworkEdge:
         """Send a message along this edge"""
         self._dest._receive(msg, self._source._uid)
 
+    def __str__(self):
+        return f"NewtorkEdge({self._source}, {self._dest})"
+
 
 class NetworkNode(Point):
     def __init__(self, point):
@@ -77,6 +80,9 @@ class Network:
     def _add_neighbours(self, visibility):
         for pt1 in self.points:
             for pt2 in self.points:
+                if pt1 is pt2:
+                    continue
+
                 if pt1._distsq(pt2) < visibility*visibility:
                     pt1.edges[pt2._uid] = NetworkEdge(pt1, pt2)
 
