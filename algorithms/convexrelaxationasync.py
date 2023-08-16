@@ -41,6 +41,9 @@ class CRANetworkNode(NetworkNode):
 
     def update(self, lipscitz):
 
+        if self.typ == "S":
+            return
+
         # Randomize z at the start
         z = random_vector(self.spans)
         prev = np.matrix(z)

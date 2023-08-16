@@ -20,8 +20,12 @@ class CRNetworkNode(NetworkNode):
     def __init__(self, point, spans):
         super().__init__(point)
 
-        # Randomize x at the start
-        self.x = random_vector(spans)
+        if self.typ == "S":
+            self.x = np.matrix(self.coords).T
+        else:
+            # Randomize x at the start
+            self.x = random_vector(spans)
+
         self.prev = self.x
 
     def begin_iteration(self, iternum):
@@ -34,6 +38,9 @@ class CRNetworkNode(NetworkNode):
 
     def end_iteration(self, lipschitz):
         """The final step of the iteration, and the bulk of the algorithm."""
+
+        if self.typ == "S":
+            return
 
         dg = len(self.edges) * self.w - sum(e.w for e in self.edges.values())
         for edge in self.edges.values():
