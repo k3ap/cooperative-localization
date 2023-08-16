@@ -18,11 +18,13 @@ anchors) in the same order as they were provided.
 import argparse
 import importlib
 import math
+import time
+from collections import defaultdict
 
 from point import read_points_from_file, Point
 
 
-def draw_image(points, locations):
+def draw_image(points, locations, filename="image.png"):
     """Draw an image of a 2D problem."""
     from PIL import Image, ImageDraw
 
@@ -70,7 +72,21 @@ def draw_image(points, locations):
             draw.ellipse([xp-PR, yp-PR, xp+PR, yp+PR], fill=(255, 0, 0))
             draw.ellipse([xl-PR, yl-PR, xl+PR, yl+PR], fill=(0,255,0))
 
-    im.save("image.png")
+    im.save(filename)
+
+
+def make_animation(args):
+    import os
+    import shutil
+    shutil.rmtree("anim/")
+    os.mkdir("anim/")
+    points = read_points_from_file(args.file)
+    solve_function = importlib.import_module(f"algorithms.{args.algorithm}").animate
+    for framenum, locations in enumerate(solve_function(points, args)):
+        draw_image(points, locations, f"anim/frame{framenum}.png")
+
+    os.chdir("anim/")
+    os.system("ffmpeg -framerate 5 -i frame%d.png anim.mp4")
 
 
 def read_and_run(args):
@@ -115,13 +131,46 @@ def read_and_run(args):
         draw_image(points, locations)
 
 
+def report(args):
+    """Report an algorithm's performance and statistics."""
+    points = read_points_from_file(args.file)
+    solve_function = importlib.import_module(f"algorithms.{args.algorithm}").solve
+
+    runs = args.report
+    total_time = 0
+    total_error = 0
+
+    num_agents = 0
+    for pt in points:
+        if pt.typ == "A":
+            num_agents += 1
+
+    for runnum in range(runs):
+        print(f"\nRun {runnum}:")
+        start = time.time()
+        locations = solve_function(points, args)
+        end = time.time()
+        total_time += end - start
+        for pt, loc in zip(points, locations):
+            if pt.typ == "S":
+                continue
+            err = sum((x-y)*(x-y) for x,y in zip(loc, pt._coords))
+            total_error += err
+            print(f"Point {pt} calculated to be at {loc}, error {math.sqrt(err)}.")
+
+    total_error /= runs * num_agents
+    print(f"Total RMSE: {math.sqrt(total_error)}")
+    print(f"Average time: {total_time / runs}")
+
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-f", "--file", help="The file to be read for points", required=True)
     parser.add_argument("-a", "--algorithm", help="The algoritm to use", required=True)
+    parser.add_argument("-r", "--report", help="Make a report on the given number of algorithm runs.", type=int, default=0)
 
-    parser.add_argument("-s", "--sigma", help="The standard variation for noise", default=1.0, type=float)
     parser.add_argument(
         "-i", "--image",
         help="Draw an image. Currently only supported for 2D coordinates.",
@@ -130,10 +179,24 @@ if __name__ == "__main__":
         const=True,
         default=False
     )
+    parser.add_argument(
+        "--animation",
+        help="Make an animation. Only supported for 2D coordinates.",
+        dest="do_anim",
+        action="store_const",
+        const=True,
+        default=False
+    )
 
+    parser.add_argument("-s", "--sigma", help="The standard variation for noise", default=0.05, type=float)
     parser.add_argument("-v", "--visibility", help="The maximum visible distance", type=float, default=math.inf)
     parser.add_argument("-j", "--iterations", help="The number of algorithm iterations, when applicable.", type=int, default=100)
 
     args = parser.parse_args()
 
-    read_and_run(args)
+    if args.report > 0:
+        report(args)
+    elif args.do_anim:
+        make_animation(args)
+    else:
+        read_and_run(args)
