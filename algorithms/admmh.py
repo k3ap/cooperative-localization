@@ -4,7 +4,7 @@ Implementation of the hybrid ADMM - Convex relaxation algorithm as proposed in
 N. Piovesan and T. Erseghe
 
 Example usage:
-`python main.py -f samples/sample2.csv -a admmh -v 5 -s 0.05 -j 100`
+`python main.py -f samples/standard/sample1.csv -a admmh -v 0.5 -s 0.05 -j 50`
 
 Note that the algorithm "switches" between two distinct versions when the first
 version finds a good-enough base solution. When (and whether) this switch occurs
@@ -109,7 +109,7 @@ class HybridNode(NetworkNode):
 
             val = np.linalg.norm(q)
 
-            if self.switched or edge.dist < val:
+            if val > 0 and (self.switched or edge.dist < val):
                 output += (val - edge.dist) * q / (c * len(self.edges) * val)
 
         return np.array(output).T[:,0]
@@ -134,7 +134,7 @@ class HybridNode(NetworkNode):
             for edge in self.edges.values():
                 arg = edge.y - self.x
                 argn = np.linalg.norm(arg)
-                if self.switched or edge.dist < argn:
+                if argn > 0 and (self.switched or edge.dist < argn):
                     edge.x = self.x \
                         + (edge.dist + 2 * self.c * argn) \
                         * arg / (1 + 2 * self.c) / argn
@@ -145,7 +145,7 @@ class HybridNode(NetworkNode):
             for edge in self.edges.values():
                 arg = self.x - edge.y
                 argn = np.linalg.norm(arg)
-                if self.switched or edge.dist < argn:
+                if argn > 0 and (self.switched or edge.dist < argn):
                     edge.x = edge.y + arg * (argn - edge.dist) / argn / (1 + 2*self.c)
                 else:
                     edge.x = edge.y
@@ -199,6 +199,11 @@ def solve(points, args):
 
     for pt in network.points:
         pt.postinit()
+
+    for pt in network.points:
+        if len(pt.edges) == 0:
+            print(f"Point {pt} has no edges.")
+            quit()
 
     # no need to do the first step of the iteration at the start
     for pt in network.points:
