@@ -4,7 +4,7 @@ Implementation of the hybrid ADMM - Convex relaxation algorithm as proposed in
 N. Piovesan and T. Erseghe
 
 Example usage:
-`python main.py -f samples/standard/sample1.csv -a admmh -v 0.5 -s 0.05 -j 50`
+`python main.py -f samples/standard/sample1.csv -a admmh -v 0.5 -s 0.05 -j 80`
 
 Note that the algorithm "switches" between two distinct versions when the first
 version finds a good-enough base solution. When (and whether) this switch occurs
@@ -28,7 +28,7 @@ EPS_C = 0.005
 ZETA_C = 0.05
 THETA_C = 0.98
 DELTA_C = 1.01
-TAU_C = 0.005
+TAU_C = 0.003
 
 
 class HybridNode(NetworkNode):

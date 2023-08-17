@@ -85,7 +85,7 @@ if __name__ == "__main__":
         "-v", "--visibility",
         help="The maximum visible distance",
         required=True,
-        type=int
+        type=float
     )
 
     args = pars.parse_args()

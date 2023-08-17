@@ -4,7 +4,7 @@ The parallel version of the convex relaxation algorithm, as described in
 Networks Using Range Measurements" by C. Soares, J. Xavier, and J. Gomes
 
 Example usage:
-`python main.py -f samples/sample2.csv -a convexrelaxation -v 4 -s 0.05 -j 300`
+`python main.py -f samples/standard/sample2.csv -a convexrelaxation -v 4 -s 0.05 -j 100`
 """
 
 import numpy as np
