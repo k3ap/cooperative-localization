@@ -53,39 +53,8 @@ def read_and_run(args):
     return points, locations
 
 
-def report(args):
-    """Report an algorithm's performance and statistics."""
-    points = read_points_from_file(args.file)
-    solve_function = importlib.import_module(f"algorithms.{args.algorithm}").solve
-
-    runs = args.report
-    total_time = 0
-    total_error = 0
-
-    num_agents = 0
-    for pt in points:
-        if pt.typ == "A":
-            num_agents += 1
-
-    for runnum in range(runs):
-        print(f"\nRun {runnum}:")
-        start = time.time()
-        locations = solve_function(points, args)
-        end = time.time()
-        total_time += end - start
-        for pt, loc in zip(points, locations):
-            if pt.typ == "S":
-                continue
-            err = sum((x-y)*(x-y) for x,y in zip(loc, pt._coords))
-            total_error += err
-            print(f"Point {pt} calculated to be at {loc}, error {math.sqrt(err)}.")
-
-    total_error /= runs * num_agents
-    print(f"Total RMSE: {math.sqrt(total_error)}")
-    print(f"Average time: {total_time / runs}")
-
-
 def make_animation(args):
+    """Make an animation for iterative algorithms."""
     import os
     import shutil
     shutil.rmtree("anim/")

@@ -19,7 +19,7 @@ import argparse
 import math
 
 from utils import draw_image
-from solving import make_animation, report, read_and_run
+from solving import make_animation, read_and_run
 
 
 if __name__ == "__main__":
@@ -27,7 +27,6 @@ if __name__ == "__main__":
 
     parser.add_argument("-f", "--file", help="The file to be read for points", required=True)
     parser.add_argument("-a", "--algorithm", help="The algoritm to use", required=True)
-    parser.add_argument("-r", "--report", help="Make a report on the given number of algorithm runs.", type=int, default=0)
 
     parser.add_argument(
         "-i", "--image",
@@ -52,9 +51,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if args.report > 0:
-        report(args)
-    elif args.do_anim:
+    if args.do_anim:
         make_animation(args)
     else:
         pts, locs = read_and_run(args)
