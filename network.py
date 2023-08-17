@@ -1,5 +1,10 @@
 """network.py
 An abstract graph representation of a network, meant to replace distrib.py.
+
+To use this, subclass NetworkNode, make a network with your new subclass in the
+solve(...) function and call the desired functions.
+Check algorithms/leastsquaresnetworked.py for an easy example and
+algorithms/admmh.py for a more advanced example.
 """
 
 
@@ -11,18 +16,29 @@ from utils import generate_uid
 
 
 class NetworkEdge:
+    """An edge in the network graph. Can be used to send information to
+    the neighbour node, which is then saved in its copy of the edge."""
+
     def __init__(self, source, dest):
+
+        # Source and destination for this node.
+        # You should avoid using these fields, except for debug purposes.
         self._source = source
         self._dest = dest
+
+        # Received information is saved as edge properties
         super().__setattr__("props", {})
         self.props["typ"] = self._dest.typ
 
+        # To make implementation easier, every anchor property is accessible
+        # with edge.pt
         if self._dest.typ == "S":
             self.props["pt"] = self._dest
 
     def __getattr__(self, name):
         if name not in self.props:
-            raise ValueError(f"{name} is not an edge property; did you forget to transmit it?")
+            s = f"{name} is not an edge property; did you forget to transmit it?"
+            raise ValueError(s)
 
         return self.props[name]
 
@@ -40,12 +56,27 @@ class NetworkEdge:
 
 
 class NetworkNode(Point):
+    """A single node in the network."""
+
     def __init__(self, point):
         super().__init__(*point._coords, typ=point.typ)
+
+        # The edges of this node. It is assumed no new edges will be added
+        # during the algorithm's run
         self.edges = {}
-        self.message_queue = deque()
-        self._uid = generate_uid()
+
+        # Some algorithms require a consistent ordering of edges, which is
+        # provided with edges_ordered()
         self._order = []
+
+        # Messages are queued before they're handled.
+        # To handle every queued message, call self.handle_messages()
+        self.message_queue = deque()
+
+        # The unique identifier of this node.
+        # These identifiers are used as keys in self.edges
+        # They're not secret, but there's often little need for them
+        self._uid = generate_uid()
 
     def __str__(self):
         return "NP(" + ", ".join(map(str, self._coords)) + ")"
@@ -59,18 +90,23 @@ class NetworkNode(Point):
             self.handle(msg, sender)
 
     def broadcast(self, msg):
+        """Send a message to all neighbouring nodes."""
         for edge in self.edges.values():
             edge.send(msg)
 
     def handle(self, msg, sender):
+        """Hadle a sent message. Override this method in your subclass."""
         pass
 
     def edges_ordered(self):
+        """An ordered view of all edges."""
         for uid in self._order:
             yield self.edges[uid]
 
 
 class Network:
+    """The network graph."""
+
     def __init__(self, points, point_cls, args, *node_init_args):
         self.points = list(map(lambda p: point_cls(p, *node_init_args), points))
 
@@ -93,3 +129,4 @@ class Network:
         for pt1 in self.points:
             for edge in pt1.edges.values():
                 edge.dist = pt1.dist_noisy(edge._dest, sigma)
+                edge._dest.edges[pt1._uid].dist = edge.dist

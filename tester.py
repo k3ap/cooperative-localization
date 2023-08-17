@@ -1,5 +1,9 @@
 """tester.py
 Compare and evaluate different algorithms on different samples.
+This is a standalone file designed primarily to compare algorithms.
+
+Example usage:
+`python tester.py -a admmh:50,convexrelaxation:200,leastsquarescoop -f samples/standard/sample1.csv,samples/standard/sample2.csv -v 0.5 -r 30 -s 0,0.1,0.25`
 """
 
 

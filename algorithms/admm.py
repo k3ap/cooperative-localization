@@ -7,6 +7,7 @@ We use scipy.optimize.minimize for the optimization problem at each step.
 Example usage:
 `python main.py -f samples/sample2.csv -a admm -v 5 -s 0.05 -j 40`
 Note that this algorithm is considerably slower than many others.
+For a (much) better implementation, check out admmh.py.
 """
 
 

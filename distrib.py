@@ -1,13 +1,15 @@
 """distrib.py
-Contains the definition of the NetworkPoint class, the base class for all
+Contains the definition of the NetworkPoint class, the base class for old
 distributed simulations.
-To use a networked simulation, you should subclass NetworkPoint, and convert
+To use a distributed simulation, you should subclass NetworkPoint, and convert
 the given points into your subclass in the `solve` function of your algorithm.
 Afterwards, call `add_neighbours` on all points, followed by `measure_distances`
 on all points.
 Implement the actual algorithm in your subclass, and call those methods in
 the desired order in the `solve` function.
 See `algorithms/leastsquaresdistrib.py` for an example usage.
+
+This class is deprecated. Use network.py instead of it.
 """
 
 

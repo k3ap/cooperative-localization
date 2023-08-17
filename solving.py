@@ -13,6 +13,8 @@ from point import read_points_from_file, Point
 
 
 def read_and_run(args):
+    """Evaluate an algorithm's performance on a dataset."""
+
     # Read and solve the problem
     points = read_points_from_file(args.file)
     solve_function = importlib.import_module(f"algorithms.{args.algorithm}").solve

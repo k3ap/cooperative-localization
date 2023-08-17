@@ -112,3 +112,36 @@ def solve(points, args):
             pt.end_iteration(lipschitz)
 
     return [tuple(map(float, pt.x)) for pt in network.points]
+
+
+def animate(points, args):
+    # Calculate the bounds for the problem
+    spans = [[c,c] for c in points[0]._coords]
+    for pt in points:
+        for i in range(len(pt._coords)):
+            spans[i][0] = min(spans[i][0], pt._coords[i])
+            spans[i][1] = max(spans[i][1], pt._coords[i])
+
+    network = Network(points, CRNetworkNode, args, spans)
+
+    # Calculate the lipschitz constant
+    maxdegree = 0
+    maxanchors = 0
+    for pt in network.points:
+        maxdegree = max(maxdegree, len(pt.edges))
+        maxanchors = max(maxanchors, pt.num_anchor_neighbours())
+
+    lipschitz = 2 * maxdegree + maxanchors
+
+    # Update nodes
+    for iternum in range(1, 1+args.iterations):
+        for pt in network.points:
+            pt.begin_iteration(iternum)
+
+        for pt in network.points:
+            pt.handle_messages()
+
+        for pt in network.points:
+            pt.end_iteration(lipschitz)
+
+        yield [tuple(map(float, pt.x)) for pt in network.points]

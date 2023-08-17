@@ -130,3 +130,46 @@ def solve(points, args):
             edge._dest.handle_messages()
 
     return [tuple(map(float, pt.x)) for pt in network.points]
+
+
+def animate(points, args):
+    # Calculate the bounds for the problem
+    spans = [[c,c] for c in points[0].coords]
+    for pt in points:
+        for i in range(len(pt._coords)):
+            spans[i][0] = min(spans[i][0], pt._coords[i])
+            spans[i][1] = max(spans[i][1], pt._coords[i])
+
+    network = Network(points, CRANetworkNode, args, spans)
+
+    # Nodes need to be aware of each other's position estimated
+    # at the very beginning
+    for pt in network.points:
+        pt.broadcast(pt.x)
+
+    for pt in network.points:
+        pt.handle_messages()
+
+    # Calculate the lipschitz constant
+    maxdegree = 0
+    maxanchors = 0
+    for pt in network.points:
+        maxdegree = max(maxdegree, len(pt.edges))
+        maxanchors = max(maxanchors, pt.num_anchor_neighbours())
+
+    lipschitz = 2 * maxdegree + maxanchors
+
+    # Update nodes
+    for iternum in range(args.iterations):
+        # choose random node and update it
+        chosen = random.choice(network.points)
+        while chosen.typ == "S":
+            chosen = random.choice(network.points)
+
+        chosen.update(lipschitz)
+        for edge in chosen.edges.values():
+            # This cheating is ok, because we don't learn any secret
+            # properties from doing it
+            edge._dest.handle_messages()
+
+        yield [tuple(map(float, pt.x)) for pt in network.points]

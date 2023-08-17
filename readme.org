@@ -1,0 +1,74 @@
+* Cooperative Localization
+
+A python implementation of some localization algorithms.
+
+** Usage
+
+To run and test an algorithm on some data, you run =main.py=;
+#+begin_src
+  python main.py -f samples/your_sample.csv -a your_algorithm
+#+end_src
+This runs =your_algorithm= with the sample problem =you_sample.csv=.
+You may wish to specify further parameters:
+- =-s=, =--sigma=: Set the standard deviation for noise generation in distance measurements.
+  Defaults to 0.05.
+- =-v=, =--visibility=: Set the maximal (true) distance between two points that can communicate
+  (and make distance measurements) with each other. Defaults to unlimited.
+- =-j=, =--iterations=: Set the number of iterations for iterative algorithms.
+  Defaults to 100, but you should set the recommended number for the algorithm you use.
+
+You may also display the results:
+- =-i=, =--image=: If the sample problem is two-dimensional, you can draw an image of the result.
+  This image will be saved into =image.png=, with anchor nodes drawn in blue,
+  original positions drawn in red and calculated positions drawn in green.
+- =--animation=: If the algorithm you use is iterative, it may support making an animation
+  (with a two-dimensional sample problem). The animation is made from images like the ones
+  you get from =-i=, with a framerate of 5 iterations per second. The frames and animation are stored
+  in the =anim/= subdirectory, which is automatically cleared every time you run =--animation=.
+
+*** Sample problem structure
+
+Samples are stored in the =samples/= subdirectory. They are =.csv= files with the following structure:
+#+begin_src
+  0,0.3,A
+  2,7,S
+  ...
+#+end_src
+Each line determines a point, first with its coordinates
+(the problem dimension is inferred from the number of coordinates given, and it's assumed every point
+has the same number of coordinates) followed by an /A/ for an agent point or an /S/ for an anchor node.
+
+The =samples/standard/= subdirectory contains some randomly generated sample problems with
+a standardized structure, along with a program to generate them.
+
+** Implementing an algorithm
+
+If you with to implement your own algorithm, you can do so by placing a =your_algorithm.py=
+file in the =algorithms/= subdirectory.
+The file should include a =solve(points, args)= function which receives a list of =point.Point= objects
+with the sample problem's coordinates, and the command-line arguments.
+Points have the following important properties:
+- =Point.typ= is the type of the point; ="S"= for anchors and ="A"= for agents.
+- =Point.coords= is a list of the true coordinates of the point. These are only accessible in anchor
+  nodes, though the true coordinates are stored in the =Point._coords= property for all coordinates.
+  You should avoid using =_coords=, except for debug purposes.
+- =Point.dim= is the point's dimension (the number of coordinates).
+  We assume that every provided point has the same dimension.
+
+The =solve= function should return a list of estimated coordinates of every point (including anchors)
+in the same order as they were provided.
+It should also not change the provided list of points, directly or indirectly.
+
+If you wish to draw animations with your algorithm, you should make the =animate(points, args)=
+function. This function accepts the same arguments as =solve=, and it should =yield= the (current)
+results in the same format every time you with to make a frame.
+
+If you don't know how to start, check out =network.py= and the provided examples in the =algorithms/=
+subdirectory.
+Some good first examples are =leastsquares.py=, =leastsquarescoop.py= and =leastsquaresnetworked.py=.
+
+** Testing
+
+To compare different algorithms under different conditions, you can use =testing.py=.
+It can accept more than one algorithm, more than one sample case and more than one sigma value,
+and will compare all the different configurations.
