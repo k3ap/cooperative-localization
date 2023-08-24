@@ -185,7 +185,7 @@ class HybridNode(NetworkNode):
                     self.c = cmax * DELTA_C
                 self.broadcast((3, self.c))
 
-            elif primal_gap < TAU_C or cmax > EPS_C:
+            elif 0 < primal_gap < TAU_C or cmax > EPS_C:
                 # in this situation, we switch to the other evaluation function
                 self.switched = True
                 self.c = ZETA_C
@@ -199,11 +199,6 @@ def solve(points, args):
 
     for pt in network.points:
         pt.postinit()
-
-    for pt in network.points:
-        if len(pt.edges) == 0:
-            print(f"Point {pt} has no edges.")
-            quit()
 
     # no need to do the first step of the iteration at the start
     for pt in network.points:

@@ -123,6 +123,9 @@ class Network:
                     pt1.edges[pt2._uid] = NetworkEdge(pt1, pt2)
 
             pt1._order = list(pt1.edges)
+            if len(pt1.edges) == 0:
+                print(f"{pt1} has no edges. Quitting.")
+                quit(1)
 
     def _measure_distances(self, sigma):
         """Measure synchronized noisy distances between nodes."""
