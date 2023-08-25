@@ -15,7 +15,7 @@ from point import read_points_from_file
 
 def draw_sample_image(sample_filename, args, image_filename="image.png"):
 
-    network = Network(read_points_from_file(sample_filename), NetworkNode, args)
+    network = Network(read_points_from_file(sample_filename), NetworkNode, args, check_disconnect=False)
 
     # The dimensions (in pixels) of the resulting image.
     WIDTH = 500

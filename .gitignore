@@ -3,4 +3,5 @@ __pycache__/*
 *.png
 *.mp4
 anim/*
-results.csv
+results*.csv
+mds-predicted-locations.csv
