@@ -110,10 +110,31 @@ class Network:
     def __init__(self, points, point_cls, args, *node_init_args, check_disconnect=True):
         self.points = list(map(lambda p: point_cls(p, *node_init_args), points))
 
-        self._add_neighbours(args.visibility, check_disconnect=check_disconnect)
+        self._add_neighbours(args.visibility)
         self._measure_distances(args.sigma)
 
-    def _add_neighbours(self, visibility, check_disconnect=True):
+        if check_disconnect and not self._check_connectivity():
+            print(f"Graph is disconnected. Quitting.")
+            quit(1)
+
+    def _check_connectivity(self):
+        """Return True if the network is connected."""
+        seen = set()
+
+        def dfs(pt):
+            seen.add(pt)
+            for edge in pt.edges.values():
+                if edge._dest not in seen:
+                    dfs(edge._dest)
+
+        dfs(self.points[0])
+        for pt in self.points:
+            if pt not in seen:
+                return False
+
+        return True
+
+    def _add_neighbours(self, visibility):
         for pt1 in self.points:
             for pt2 in self.points:
                 if pt1 is pt2:
@@ -123,9 +144,6 @@ class Network:
                     pt1.edges[pt2._uid] = NetworkEdge(pt1, pt2)
 
             pt1._order = list(pt1.edges)
-            if check_disconnect and len(pt1.edges) == 0:
-                print(f"{pt1} has no edges. Quitting.")
-                quit(1)
 
     def _measure_distances(self, sigma):
         """Measure synchronized noisy distances between nodes."""
