@@ -11,6 +11,7 @@ algorithms/admmh.py for a more advanced example.
 from point import Point
 import random
 from collections import deque
+from math import atan2, pi
 
 from utils import generate_uid
 
@@ -151,3 +152,16 @@ class Network:
             for edge in pt1.edges.values():
                 edge.dist = pt1.dist_noisy(edge._dest, sigma)
                 edge._dest.edges[pt1._uid].dist = edge.dist
+
+    def measure_angles(self, sigma):
+        """Measure synchronized noisy angles between nodes. Only works on 2D problems, and should
+        be called from the algorithm if required."""
+        assert self.points[0].dim == 2
+
+        for pt in self.points:
+            for edge in pt.edges.values():
+                diff = tuple(c1 - c2 for c1, c2 in zip(edge._dest._coords, pt._coords))
+                actual = atan2(diff[1], diff[0])
+                approx = actual + pi * random.gauss(0, sigma)
+                edge.angle = approx
+                edge._dest.edges[pt._uid].angle = (pi + approx) % (2*pi)

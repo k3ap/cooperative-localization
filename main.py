@@ -45,7 +45,8 @@ if __name__ == "__main__":
         default=False
     )
 
-    parser.add_argument("-s", "--sigma", help="The standard variation for noise", default=0.05, type=float)
+    parser.add_argument("-s", "--sigma", help="The standard deviation for distance noise", default=0.05, type=float)
+    parser.add_argument("-t", "--sigma-angles", help="The standard deviation for angle noise", default=0.03, type=float)
     parser.add_argument("-v", "--visibility", help="The maximum visible distance", type=float, default=math.inf)
     parser.add_argument("-j", "--iterations", help="The number of algorithm iterations, when applicable.", type=int, default=100)
 
