@@ -72,7 +72,7 @@ class CRANetworkNode(NetworkNode):
                 if edge.typ == "S":
                     # the second sum actually computes the exact
                     # same thing, but for anchors only
-                    n += w - n
+                    df += w - n
 
             prev = np.matrix(z)
             z = w - df / lipscitz
