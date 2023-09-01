@@ -18,7 +18,7 @@ anchors) in the same order as they were provided.
 import argparse
 import math
 
-from utils import draw_image
+from utils import draw_image_smart
 from solving import make_animation, read_and_run
 
 
@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "-i", "--image",
-        help="Draw an image. Currently only supported for 2D coordinates.",
+        help="Draw an image.",
         dest="do_image",
         action="store_const",
         const=True,
@@ -57,5 +57,5 @@ if __name__ == "__main__":
     else:
         pts, locs = read_and_run(args)
         if args.do_image:
-            draw_image(pts, locs)
+            draw_image_smart(pts, locs)
 

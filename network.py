@@ -16,6 +16,10 @@ from math import atan2, pi
 from utils import generate_uid
 
 
+class DisconnectedGraphError(Exception):
+    pass
+
+
 class NetworkEdge:
     """An edge in the network graph. Can be used to send information to
     the neighbour node, which is then saved in its copy of the edge."""
@@ -115,8 +119,7 @@ class Network:
         self._measure_distances(args.sigma)
 
         if check_disconnect and not self._check_connectivity():
-            print(f"Graph is disconnected. Quitting.")
-            quit(1)
+            raise DisconnectedGraphError("Graph is disconnected.")
 
     def _check_connectivity(self):
         """Return True if the network is connected."""

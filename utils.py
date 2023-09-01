@@ -40,6 +40,46 @@ def generate_uid(length=16):
     return s
 
 
+def draw_image_smart(points, locations):
+    """Draw either an image or a 3d plot, depending on point dimensions."""
+    if points[0].dim == 2:
+        draw_image(points, locations)
+    elif points[0].dim == 3:
+        draw_3d_plot(points, locations)
+    else:
+        raise ValueError(f"Cannot draw {points[0].dim}-dimensional image.")
+
+
+def draw_3d_plot(points, locations):
+    import matplotlib.pyplot as plt
+    fig = plt.figure()
+    ax = fig.add_subplot(projection="3d")
+
+    xs_anchors = [pt._coords[0] for pt in points if pt.typ == "S"]
+    ys_anchors = [pt._coords[1] for pt in points if pt.typ == "S"]
+    zs_anchors = [pt._coords[2] for pt in points if pt.typ == "S"]
+
+    xs_agents = [pt._coords[0] for pt in points if pt.typ == "A"]
+    ys_agents = [pt._coords[1] for pt in points if pt.typ == "A"]
+    zs_agents = [pt._coords[2] for pt in points if pt.typ == "A"]
+
+    xs_locs = [loc[0] for pt, loc in zip(points, locations) if pt.typ == "A"]
+    ys_locs = [loc[1] for pt, loc in zip(points, locations) if pt.typ == "A"]
+    zs_locs = [loc[2] for pt, loc in zip(points, locations) if pt.typ == "A"]
+
+    for pt, loc in zip(points, locations):
+        if pt.typ == "S":
+            continue
+        ax.plot([pt._coords[0], loc[0]], [pt._coords[1], loc[1]], [pt._coords[2], loc[2]], c="black")
+
+    ax.scatter(xs_anchors, ys_anchors, zs_anchors, c="blue")
+    ax.scatter(xs_agents, ys_agents, zs_agents, c="red")
+    ax.scatter(xs_locs, ys_locs, zs_locs, c="green")
+
+    plt.show()
+
+
+
 def draw_image(points, locations, filename="image.png"):
     """Draw an image of a 2D problem."""
     from PIL import Image, ImageDraw
