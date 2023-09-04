@@ -26,19 +26,35 @@ def solve(points, args):
             V[indicies[pt], indicies[edge._dest]] += -1
 
     Vinv = np.linalg.inv(V + np.ones((n,n)))
-    X = np.random.rand(n, 2) - 0.5 * np.ones((n, 2))
 
-    for iternum in range(args.iterations):
-        B = np.zeros((n, n))
+    best_X = None
+    best_stress = np.inf
+    for __ in range(5):
+        X = np.random.rand(n, 2) - 0.5 * np.ones((n, 2))
 
+        for iternum in range(args.iterations):
+            B = np.zeros((n, n))
+
+            for pt in network.points:
+                for edge in pt.edges.values():
+                    dist = np.linalg.norm( X[indicies[pt],:] - X[indicies[edge._dest],:] )
+                    val = edge.dist / dist
+                    B[indicies[pt], indicies[pt]] += val
+                    B[indicies[pt], indicies[edge._dest]] -= val
+
+            X = Vinv @ B @ X
+
+        stress = 0
         for pt in network.points:
             for edge in pt.edges.values():
-                dist = np.linalg.norm( X[indicies[pt],:] - X[indicies[edge._dest],:] )
-                val = edge.dist / dist
-                B[indicies[pt], indicies[pt]] += val
-                B[indicies[pt], indicies[edge._dest]] -= val
+                norm = np.linalg.norm(X[indicies[pt],:] - X[indicies[edge._dest],:])
+                stress += (edge.dist - norm) * (edge.dist - norm)
 
-        X = Vinv @ B @ X
+        if stress < best_stress:
+            best_stress = stress
+            best_X = X
+
+    X = best_X
 
     # We will need to transform the predicted locations into the original
     # coordinate matrix
