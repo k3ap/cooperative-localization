@@ -28,7 +28,7 @@ EPS_C = 0.005
 ZETA_C = 0.05
 THETA_C = 0.98
 DELTA_C = 1.01
-TAU_C = 0.003
+TAU_C = 1e-2
 
 
 class HybridNode(NetworkNode):
@@ -38,7 +38,8 @@ class HybridNode(NetworkNode):
         self.switched = False
 
         if self.typ == "A":
-            self.x = np.matrix(np.zeros((self.dim,))).T
+            # self.x = np.matrix(np.zeros((self.dim,))).T
+            self.x = np.matrix(np.random.rand(self.dim)).T
         else:
             self.x = np.matrix(self.coords).T
 
@@ -51,7 +52,8 @@ class HybridNode(NetworkNode):
             if edge.typ == "S":
                 edge.x = np.matrix(edge.pt.coords).T
             else:
-                edge.x = np.matrix(np.zeros((self.dim,))).T
+                # edge.x = np.matrix(np.zeros((self.dim,))).T
+                edge.x = np.matrix(np.random.rand(self.dim)).T
 
             edge.lam1 = np.matrix(np.zeros((self.dim,))).T
             edge.lam2 = np.matrix(np.zeros((self.dim,))).T

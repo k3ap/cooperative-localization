@@ -39,7 +39,7 @@ def solve(points, args):
         positions = get_positions(locs, network.points[0].dim)
         for pt in network.points:
             for edge in pt.edges.values():
-                s += sqr(edge.dist - np.linalg.norm(positions[pt]-positions[edge._dest]))
+                s += sqr(edge.dist - np.linalg.norm(positions[pt]-positions[edge._dest])) / edge.dist
         return s
 
     def grad(locs):
@@ -54,7 +54,7 @@ def solve(points, args):
             for edge in pt.edges.values():
                 n = np.linalg.norm(positions[pt] - positions[edge._dest])
                 for k in range(dim):
-                    s[idx+k] += (edge.dist - n) * (positions[pt][k,0] - positions[edge._dest][k,0]) / n
+                    s[idx+k] += (edge.dist - n) * (positions[pt][k,0] - positions[edge._dest][k,0]) / n / edge.dist
 
             idx += dim
 
