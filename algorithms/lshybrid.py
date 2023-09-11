@@ -1,5 +1,5 @@
-"""lsangle.py
-A least squares-based algorithm which takes angles into account.
+"""lshybrid.py
+A least squares-based algorithm which takes both distances and angles into account.
 """
 
 

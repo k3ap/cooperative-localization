@@ -12,6 +12,7 @@ from point import Point
 import random
 from collections import deque
 from math import atan2, pi
+import heapq
 
 from utils import generate_uid
 
@@ -59,6 +60,10 @@ class NetworkEdge:
     def __str__(self):
         return f"NewtorkEdge({self._source}, {self._dest})"
 
+    def __lt__(self, o):
+        """Less-than. Required in building MST."""
+        return str(self) < str(o)
+
 
 class NetworkNode(Point):
     """A single node in the network."""
@@ -85,6 +90,9 @@ class NetworkNode(Point):
 
     def __str__(self):
         return "NP(" + ", ".join(map(str, self._coords)) + ")"
+
+    def __repr__(self):
+        return str(self)
 
     def _receive(self, message, sender):
         self.message_queue.append((message, sender))
@@ -113,6 +121,9 @@ class Network:
     """The network graph."""
 
     def __init__(self, points, point_cls, args, *node_init_args, check_disconnect=True):
+        self._point_cls = point_cls
+        self._args = args
+        self._node_init_args = node_init_args
         self.points = list(map(lambda p: point_cls(p, *node_init_args), points))
 
         self._add_neighbours(args.visibility)
@@ -168,3 +179,43 @@ class Network:
                 approx = actual + pi * random.gauss(0, sigma)
                 edge.angle = approx
                 edge._dest.edges[pt._uid].angle = (pi + approx) % (2*pi)
+
+    def mst(self, edge_weight=(lambda edge: edge.dist)):
+        """Make a MST from this network by deleting edges.
+        Even edges in the resulting MST will be deleted (and replaced), so
+        don't store data on them.
+        The edge_weight function should return the weight associated with a
+        given edge. Edges with smaller weights will be kept."""
+
+        edges = []
+        taken_points = set()
+        taken_edges = []
+
+        # pick an arbitrary starting vertex
+        taken_points.add(self.points[0])
+        for edge in self.points[0].edges.values():
+            heapq.heappush(edges, (edge_weight(edge), edge))
+
+        while len(taken_points) < len(self.points):
+            __, edge = heapq.heappop(edges)
+
+            if edge._dest in taken_points:
+                continue
+
+            taken_edges.append(edge)
+            taken_points.add(edge._dest)
+
+            for e in edge._dest.edges.values():
+                if e._dest in taken_points:
+                    continue
+                heapq.heappush(edges, (edge_weight(e), e))
+
+        for pt in self.points:
+            pt.edges.clear()
+
+        for edge in taken_edges:
+            edge._source.edges[edge._dest._uid] = NetworkEdge(edge._source, edge._dest)
+            edge._dest.edges[edge._source._uid] = NetworkEdge(edge._dest, edge._source)
+
+        for pt in self.points:
+            pt._order = list(pt.edges)

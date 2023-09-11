@@ -16,6 +16,8 @@ from point import read_points_from_file
 def draw_sample_image(sample_filename, args, image_filename="image.png"):
 
     network = Network(read_points_from_file(sample_filename), NetworkNode, args, check_disconnect=False)
+    if args.mst:
+        network.mst()
 
     # The dimensions (in pixels) of the resulting image.
     WIDTH = 500
@@ -71,6 +73,7 @@ if __name__ == "__main__":
 
     parser.add_argument("-f", "--file", help="The sample file to visualize.")
     parser.add_argument("-v", "--visibility", help="The visibility distance.", type=float)
+    parser.add_argument("-mst", help="Draw the minimum spanning tree.", default=False, action="store_const", const=True)
 
     args = parser.parse_args()
     args.sigma = 0

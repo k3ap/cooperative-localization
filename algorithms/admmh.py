@@ -252,4 +252,3 @@ def animate(points, args):
             pt.iteration_end()
 
         yield [tuple(float(x) for x in pt.x) for pt in network.points]
-
