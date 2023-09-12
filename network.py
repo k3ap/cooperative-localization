@@ -219,3 +219,5 @@ class Network:
 
         for pt in self.points:
             pt._order = list(pt.edges)
+
+        self._measure_distances(self._args.sigma)
