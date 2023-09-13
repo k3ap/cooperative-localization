@@ -13,14 +13,26 @@ import time
 from math import sqrt
 import importlib
 import datetime
+import itertools
 
 from point import read_points_from_file
 from network import DisconnectedGraphError
 from samples.standard.generate_random import generate_points
 
 
-def test_configuration(algorithm_name, point_filename, sigma, sigma_angles, visibility, args):
+def configurations(args):
+    algorithms = args.algorithms.split(",")
+    filenames = args.files.split(",")
+    sigmas = list(map(float, args.sigmas.split(",")))
+    sigmas_angles = list(map(float, args.sigmas_angles.split(",")))
+    visibilities = list(map(float, args.visibilities.split(",")))
+    return itertools.product(filenames, algorithms, sigmas, sigmas_angles, visibilities)
+
+
+def test_configuration(configuration, args, datawriter):
     """Test a particular configuration."""
+
+    point_filename, algorithm_name, sigma, sigma_angles, visibility = configuration
 
     algo_name, *params = algorithm_name.split(":")
 
@@ -80,6 +92,7 @@ def test_configuration(algorithm_name, point_filename, sigma, sigma_angles, visi
             err = sum((x-y)*(x-y) for x,y in zip(loc, pt._coords))
             run_error += err
 
+        datawriter.writerow(list(map(str, configuration)) + [str(run_error)])
         total_error += run_error / num_agents
 
     return [sqrt(total_error / runs), total_time / args.repeats]
@@ -123,26 +136,28 @@ if __name__ == "__main__":
 
     args = pars.parse_args()
 
-    algorithms = args.algorithms.split(",")
-    filenames = args.files.split(",")
-    sigmas = list(map(float, args.sigmas.split(",")))
-    sigmas_angles = list(map(float, args.sigmas_angles.split(",")))
-    visibilites = list(map(float, args.visibilities.split(",")))
+
+    datafile = open("data.csv", "a")
+    datawriter = csv.writer(datafile)
 
     start = datetime.datetime.now()
 
-    with open("results.csv", "w") as f:
+    try:
+        with open("results.csv", "w") as f:
 
-        writer = csv.writer(f)
-        writer.writerow(["sample", "algorithm", "sigma", "sigma_angle", "visibility", "RMSE", "time"])
+            writer = csv.writer(f)
+            writer.writerow(["sample", "algorithm", "sigma", "sigma_angle", "visibility", "RMSE", "time"])
 
-        for fname in filenames:
-            for algo in algorithms:
-                for sigma in sigmas:
-                    for sigma_angle in sigmas_angles:
-                        for visibility in visibilites:
-                            results = test_configuration(algo, fname, sigma, sigma_angle, visibility, args)
-                            writer.writerow([fname, algo, str(sigma), str(sigma_angle), str(visibility)] + results)
+            for configuration in configurations(args):
+                results = test_configuration(configuration, args, datawriter)
+                writer.writerow(list(map(str, configuration)) + results)
+
+    except Exception as e:
+        print("Error during simulation.")
+        import traceback
+        traceback.print_exc()
+    finally:
+        datafile.close()
 
     end = datetime.datetime.now()
     print(f"Simulations concluded. Running time: {str(end-start)}.")
