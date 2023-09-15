@@ -27,34 +27,19 @@ def solve(points, args):
 
     Vinv = np.linalg.inv(V + np.ones((n,n)))
 
-    best_X = None
-    best_stress = np.inf
-    for __ in range(5):
-        X = np.random.rand(n, 2) - 0.5 * np.ones((n, 2))
+    X = np.random.rand(n, 2) - 0.5 * np.ones((n, 2))
 
-        for iternum in range(args.iterations):
-            B = np.zeros((n, n))
+    for iternum in range(args.iterations):
+        B = np.zeros((n, n))
 
-            for pt in network.points:
-                for edge in pt.edges.values():
-                    dist = np.linalg.norm( X[indicies[pt],:] - X[indicies[edge._dest],:] )
-                    val = edge.dist / dist
-                    B[indicies[pt], indicies[pt]] += val
-                    B[indicies[pt], indicies[edge._dest]] -= val
-
-            X = Vinv @ B @ X
-
-        stress = 0
         for pt in network.points:
             for edge in pt.edges.values():
-                norm = np.linalg.norm(X[indicies[pt],:] - X[indicies[edge._dest],:])
-                stress += (edge.dist - norm) * (edge.dist - norm)
+                dist = np.linalg.norm( X[indicies[pt],:] - X[indicies[edge._dest],:] )
+                val = edge.dist / dist
+                B[indicies[pt], indicies[pt]] += val
+                B[indicies[pt], indicies[edge._dest]] -= val
 
-        if stress < best_stress:
-            best_stress = stress
-            best_X = X
-
-    X = best_X
+        X = Vinv @ B @ X
 
     # We will need to transform the predicted locations into the original
     # coordinate matrix
@@ -84,6 +69,7 @@ def solve(points, args):
     # Build the transformation matrix such that it solves
     # [x2 - x1, y2 - y1]^T = Q [s2 - s1, t2 - t1]^T
     # [x3 - x1, y3 - y1]^T = Q [s3 - s1, t3 - t1]^T
+    # In the ideal scenario, the determinant of Q should be +1 or -1
     Q = np.zeros((2,2))
     x1 = X[indicies[anchors[0]],0]
     y1 = X[indicies[anchors[0]],1]
@@ -109,7 +95,5 @@ def solve(points, args):
     # The translation
     v1 = X[indicies[anchors[0]],:]
     w1 = np.array(anchors[0].coords)
-
-    # In the ideal scenario, the determinant of Q should be +1 or -1
 
     return [tuple(Q @ (X[idx,:] - v1) + w1) for idx in range(len(points))]
