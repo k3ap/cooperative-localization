@@ -47,7 +47,7 @@ def test_configuration(configuration, args, datawriter):
     algo_func = importlib.import_module(f"algorithms.{algo_name}").solve
 
     total_time = 0
-    total_error = 0
+    errors = []
 
     runs = 0
 
@@ -93,9 +93,12 @@ def test_configuration(configuration, args, datawriter):
             run_error += err
 
         datawriter.writerow(list(map(str, configuration)) + [str(run_error)])
-        total_error += run_error / num_agents
+        errors.append(run_error / num_agents)
 
-    return [sqrt(total_error / runs), total_time / args.repeats]
+    errors.sort()
+    taken_num = min(len(errors), int(len(errors) * args.best_percent))
+    total_error = sum(errors[:taken_num])
+    return [sqrt(total_error / taken_num), total_time / args.repeats]
 
 
 if __name__ == "__main__":
@@ -132,6 +135,13 @@ if __name__ == "__main__":
         "-v", "--visibilities",
         help="The maximum visible distances to test.",
         required=True
+    )
+
+    pars.add_argument(
+        "-b", "--best-percent",
+        help="The percentage of best runs to take into account",
+        type=float,
+        default=1.0
     )
 
     args = pars.parse_args()

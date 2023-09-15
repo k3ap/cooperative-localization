@@ -8,3 +8,5 @@ results*.csv
 mds-predicted-locations.csv
 RANDOM.csv
 data.csv
+*-fails.csv
+*-fails-*.csv
