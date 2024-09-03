@@ -19,6 +19,9 @@ def draw_sample_image(sample_filename, args, image_filename="image.png"):
     if args.mst:
         network.mst()
 
+    avgdeg = sum(len(pt.edges) for pt in network.points) / len(network.points)
+    print(avgdeg)
+
     # The dimensions (in pixels) of the resulting image.
     WIDTH = 500
     HEIGHT = 500

@@ -152,7 +152,7 @@ class HybridNode(NetworkNode):
                 else:
                     edge.x = edge.y
 
-            x0 = self.x.T
+            x0 = np.array(self.x).reshape((2,))
             self.x = np.matrix(scipy.optimize.minimize(self.func, x0, jac=self.funcgrad).x).T
 
         # send out our new values

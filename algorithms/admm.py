@@ -41,9 +41,11 @@ class ADMMNetworkNode(NetworkNode):
             self.x = np.matrix(self.coords).T
         else:
             self.x = np.matrix(np.zeros( (self.dim, 1) ))
+            # self.x = np.matrix(self._coords).T
 
         for edge in self.edges_ordered():
             edge.x = np.matrix(np.zeros( (self.dim, 1) ))
+            edge.x = np.matrix(edge._dest._coords).T
             edge.lam1 = np.matrix(np.zeros( (self.dim, 1) ))
             edge.lam2 = np.matrix(np.zeros( (self.dim, 1) ))
 
@@ -190,3 +192,28 @@ def solve(points, args):
             pt.iteration_end()
 
     return [tuple(float(c) for c in pt.x) for pt in network.points]
+
+
+def animate(points, args):
+    network = Network(points, ADMMNetworkNode, args)
+
+    for pt in network.points:
+        pt.first_iteration_start()
+
+    for pt in network.points:
+        pt.handle_messages()
+
+    for pt in network.points:
+        pt.first_iteration_end()
+
+    for iternum in range(args.iterations):
+        for pt in network.points:
+            pt.iteration_start()
+
+        for pt in network.points:
+            pt.handle_messages()
+
+        for pt in network.points:
+            pt.iteration_end()
+
+        yield [tuple(float(x) for x in pt.x) for pt in network.points]
